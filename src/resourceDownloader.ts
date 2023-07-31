@@ -2,6 +2,8 @@ import axios from "axios";
 import { load } from "cheerio";
 import fs from "fs";
 import decompress from "decompress";
+import Relationship from "./models/relationship";
+import { collections } from "./services/database.service";
 
 const BASE_URL = "https://dados.cvm.gov.br";
 const STR_FILEPATH = "resources/";
@@ -46,6 +48,34 @@ async function downloadZIP() {
   return STR_FILEPATH + filename;
 }
 
+async function insertIntoDB(strPath: string) {
+  const N_CNPJ = 1;
+  const N_TYPE = 4;
+  const N_ASSET = 16;
+  const STR_STOCKS = "Ações";
+
+  const data = fs.readFileSync(strPath, { encoding: "latin1" }).split(/\r?\n/);
+
+  const pairs: Relationship[] = [];
+  data.forEach((entry) => {
+    const entryData = entry.split(";");
+    const cnpj = entryData[N_CNPJ];
+    const type = entryData[N_TYPE];
+    const asset = entryData[N_ASSET];
+    if (type !== STR_STOCKS) {
+      return;
+    }
+
+    pairs.push({
+      fund: cnpj,
+      stock: asset,
+    });
+  });
+
+  await collections.relationships?.deleteMany({});
+  await collections.relationships?.insertMany(pairs);
+}
+
 export default async function downloadResource() {
   const STR_WANTED_FILE = "cda_fi_BLC_4";
   const STR_LOCAL_FILE = "compositions.csv";
@@ -58,6 +88,7 @@ export default async function downloadResource() {
           return file.path.startsWith(STR_WANTED_FILE);
         }) || files[0];
       fs.writeFileSync(STR_FILEPATH + STR_LOCAL_FILE, fileWanted.data);
+      insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
     }
   } catch (e) {
     console.log("erro", e);
