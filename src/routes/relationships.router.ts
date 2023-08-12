@@ -81,6 +81,9 @@ relationshipsRouter.get(
         throw new Error("The request need a fund");
       }
 
+      const skip = req.body.pageNumber ? req.body.pageNumber - 1 : 0;
+      const limit = req.body.pageSize || 10;
+
       const pipeline = [
         { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
         { $project: { _id: 0, fund: "$_id", stocks: 1 } },
@@ -113,7 +116,8 @@ relationshipsRouter.get(
         })
         .sort((a, b) => b.similarity - a.similarity);
 
-      res.send(JSON.stringify(evaluatedFunds));
+      const paginatedFunds = evaluatedFunds.splice(skip * limit, limit);
+      res.send(JSON.stringify(paginatedFunds));
     } catch (err: any) {
       res.status(400).send(err.message);
     }
