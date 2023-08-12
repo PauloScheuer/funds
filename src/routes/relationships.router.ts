@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { collections } from "../services/database.service";
+import { calculateJaccardSimilarity } from "../utils/similarityUtils";
 
 export const relationshipsRouter = express.Router();
 relationshipsRouter.use(express.json());
@@ -65,3 +66,56 @@ relationshipsRouter.get("/stocks", async (req: Request, res: Response) => {
     res.status(400).send(err.message);
   }
 });
+
+relationshipsRouter.get(
+  "/similarFunds",
+  async (req: Request, res: Response) => {
+    try {
+      if (!collections.relationships) {
+        throw new Error("There is no data");
+      }
+
+      const fund = req.body.fund;
+
+      if (!fund) {
+        throw new Error("The request need a fund");
+      }
+
+      const pipeline = [
+        { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
+        { $project: { _id: 0, fund: "$_id", stocks: 1 } },
+      ];
+
+      const allFunds = await collections.relationships
+        .aggregate(pipeline)
+        .toArray();
+
+      const requestedFundIndex = allFunds.findIndex(
+        (entry) => entry.fund === fund
+      );
+
+      if (!allFunds[requestedFundIndex]) {
+        throw new Error("Fund not found");
+      }
+
+      const requestedFund = { ...allFunds[requestedFundIndex] };
+      delete allFunds[requestedFundIndex];
+
+      const evaluatedFunds = allFunds
+        .map((entry) => {
+          return {
+            ...entry,
+            similarity: calculateJaccardSimilarity(
+              requestedFund.stocks,
+              entry.stocks
+            ),
+          };
+        })
+        .sort((a, b) => b.similarity - a.similarity);
+
+      res.send(JSON.stringify(evaluatedFunds));
+    } catch (err: any) {
+      res.status(400).send(err.message);
+    }
+  }
+);
