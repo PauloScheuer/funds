@@ -91,6 +91,6 @@ export default async function downloadResource() {
       insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
     }
   } catch (e) {
-    console.log("erro", e);
+    console.log("error", e);
   }
 }
