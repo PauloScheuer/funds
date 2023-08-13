@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import VueFeather from 'vue-feather'
-
-console.log(VueFeather)
 </script>
 
 <template>
@@ -108,5 +106,35 @@ body {
   border-radius: 5px;
   margin-top: 10px;
   margin-left: 10px;
+  overflow-y: scroll;
+}
+
+.content-container {
+  margin: 40px 0px 0px 40px;
+}
+
+.title {
+  color: #2ECC71;
+  font-weight: bold;
+  font-size: 48px;
+  margin-bottom: 40px;
+}
+
+.subtitle {
+  color: #2ECC71;
+  font-weight: bold;
+  font-size: 32px;
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+.text {
+  font-size: 20px;
+  margin-bottom: 8px;
+  background-color: white;
+  padding: 8px;
+  border-radius: 5px;
+  width: fit-content;
+  box-shadow: 2px 2px 0px 0px #2ECC71;
 }
 </style>

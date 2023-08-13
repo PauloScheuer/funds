@@ -11,12 +11,19 @@ relationshipsRouter.get("/funds", async (req: Request, res: Response) => {
       throw new Error("There is no data");
     }
 
-    const match = req.body.filterBy
-      ? { fund: { $regex: req.body.filterBy.replace(".", "\\.") } }
+    const reqFilterBy = req.query.filterBy ? String(req.query.filterBy) : null;
+    const reqOrderBy = req.query.orderBy ? Number(req.query.orderBy) : null;
+    const reqPageNumber = req.query.pageNumber
+      ? Number(req.query.pageNumber)
+      : null;
+    const reqPageSize = req.query.pageSize ? Number(req.query.pageSize) : null;
+
+    const match = reqFilterBy
+      ? { fund: { $regex: reqFilterBy.replace(".", "\\.") } }
       : {};
-    const orderBy = { fund: req.body.orderBy || 1 };
-    const skip = req.body.pageNumber ? req.body.pageNumber - 1 : 0;
-    const limit = req.body.pageSize || 10;
+    const orderBy = { fund: reqOrderBy || 1 };
+    const limit = reqPageSize || 10;
+    const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * limit;
 
     const pipeline = [
       { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
@@ -41,12 +48,19 @@ relationshipsRouter.get("/stocks", async (req: Request, res: Response) => {
       throw new Error("There is no data");
     }
 
-    const filterBy = req.body.filterBy
-      ? { stock: new RegExp(`.*${req.body.filterBy}.*`) }
+    const reqFilterBy = req.query.filterBy ? String(req.query.filterBy) : null;
+    const reqOrderBy = req.query.orderBy ? Number(req.query.orderBy) : null;
+    const reqPageNumber = req.query.pageNumber
+      ? Number(req.query.pageNumber)
+      : null;
+    const reqPageSize = req.query.pageSize ? Number(req.query.pageSize) : null;
+
+    const filterBy = reqFilterBy
+      ? { stock: new RegExp(`.*${reqFilterBy}.*`) }
       : {};
-    const orderBy = { stock: req.body.orderBy || 1 };
-    const skip = req.body.pageNumber ? req.body.pageNumber - 1 : 0;
-    const limit = req.body.pageSize || 10;
+    const orderBy = { stock: reqOrderBy || 1 };
+    const limit = reqPageSize || 10;
+    const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * limit;
 
     const pipeline = [
       { $group: { _id: "$stock", funds: { $push: "$fund" } } },
@@ -75,14 +89,21 @@ relationshipsRouter.get(
         throw new Error("There is no data");
       }
 
-      const fund = req.body.fund;
+      const fund = req.query.fund;
 
       if (!fund) {
         throw new Error("The request need a fund");
       }
 
-      const skip = req.body.pageNumber ? req.body.pageNumber - 1 : 0;
-      const limit = req.body.pageSize || 10;
+      const reqPageNumber = req.query.pageNumber
+        ? Number(req.query.pageNumber)
+        : null;
+      const reqPageSize = req.query.pageSize
+        ? Number(req.query.pageSize)
+        : null;
+
+      const skip = reqPageNumber ? reqPageNumber - 1 : 0;
+      const limit = reqPageSize || 10;
 
       const pipeline = [
         { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
