@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { collections } from "../services/database.service";
 import { calculateJaccardSimilarity } from "../utils/similarityUtils";
+import RelationshipsManager from "../managers/relationships.manager";
 
 export const relationshipsRouter = express.Router();
 relationshipsRouter.use(express.json());
@@ -11,30 +12,25 @@ relationshipsRouter.get("/funds", async (req: Request, res: Response) => {
       throw new Error("There is no data");
     }
 
-    const reqFilterBy = req.query.filterBy ? String(req.query.filterBy) : null;
-    const reqOrderBy = req.query.orderBy ? Number(req.query.orderBy) : null;
+    const reqFilterBy = req.query.filterBy
+      ? String(req.query.filterBy)
+      : undefined;
+    const reqOrderBy = req.query.orderBy
+      ? Number(req.query.orderBy)
+      : undefined;
     const reqPageNumber = req.query.pageNumber
       ? Number(req.query.pageNumber)
-      : null;
-    const reqPageSize = req.query.pageSize ? Number(req.query.pageSize) : null;
+      : undefined;
+    const reqPageSize = req.query.pageSize
+      ? Number(req.query.pageSize)
+      : undefined;
 
-    const match = reqFilterBy
-      ? { fund: { $regex: reqFilterBy.replace(".", "\\.") } }
-      : {};
-    const orderBy = { fund: reqOrderBy || 1 };
-    const limit = reqPageSize || 10;
-    const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * limit;
-
-    const pipeline = [
-      { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
-      { $project: { _id: 0, fund: "$_id", stocks: 1 } },
-      { $match: match },
-      { $sort: orderBy },
-      { $skip: skip },
-      { $limit: limit },
-    ];
-
-    const funds = await collections.relationships.aggregate(pipeline).toArray();
+    const funds = await RelationshipsManager.getFunds({
+      reqFilterBy,
+      reqOrderBy,
+      reqPageSize,
+      reqPageNumber,
+    });
 
     res.send(JSON.stringify(funds));
   } catch (err: any) {
@@ -48,32 +44,25 @@ relationshipsRouter.get("/stocks", async (req: Request, res: Response) => {
       throw new Error("There is no data");
     }
 
-    const reqFilterBy = req.query.filterBy ? String(req.query.filterBy) : null;
-    const reqOrderBy = req.query.orderBy ? Number(req.query.orderBy) : null;
+    const reqFilterBy = req.query.filterBy
+      ? String(req.query.filterBy)
+      : undefined;
+    const reqOrderBy = req.query.orderBy
+      ? Number(req.query.orderBy)
+      : undefined;
     const reqPageNumber = req.query.pageNumber
       ? Number(req.query.pageNumber)
-      : null;
-    const reqPageSize = req.query.pageSize ? Number(req.query.pageSize) : null;
+      : undefined;
+    const reqPageSize = req.query.pageSize
+      ? Number(req.query.pageSize)
+      : undefined;
 
-    const filterBy = reqFilterBy
-      ? { stock: new RegExp(`.*${reqFilterBy}.*`) }
-      : {};
-    const orderBy = { stock: reqOrderBy || 1 };
-    const limit = reqPageSize || 10;
-    const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * limit;
-
-    const pipeline = [
-      { $group: { _id: "$stock", funds: { $push: "$fund" } } },
-      { $project: { _id: 0, stock: "$_id", funds: 1 } },
-      { $match: filterBy },
-      { $sort: orderBy },
-      { $skip: skip },
-      { $limit: limit },
-    ];
-
-    const stocks = await collections.relationships
-      .aggregate(pipeline)
-      .toArray();
+    const stocks = await RelationshipsManager.getStocks({
+      reqFilterBy,
+      reqOrderBy,
+      reqPageSize,
+      reqPageNumber,
+    });
 
     res.send(JSON.stringify(stocks));
   } catch (err: any) {
@@ -105,14 +94,7 @@ relationshipsRouter.get(
       const skip = reqPageNumber ? reqPageNumber - 1 : 0;
       const limit = reqPageSize || 10;
 
-      const pipeline = [
-        { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
-        { $project: { _id: 0, fund: "$_id", stocks: 1 } },
-      ];
-
-      const allFunds = await collections.relationships
-        .aggregate(pipeline)
-        .toArray();
+      const allFunds = await RelationshipsManager.getFunds({});
 
       const requestedFundIndex = allFunds.findIndex(
         (entry) => entry.fund === fund

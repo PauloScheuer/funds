@@ -40,11 +40,14 @@ export default {
   },
   methods: {
     async fetchInitialData() {
+      this.curPage = 1;
       this.searchParams = { ...this.tempSearchParams };
       const res = await api.get('/relationships/funds', {
         params: {
           filterBy: this.searchParams.filterBy,
-          orderBy: this.searchParams.orderBy
+          orderBy: this.searchParams.orderBy,
+          pageNumber: this.curPage,
+          pageSize: 10
         }
       });
       if (res.status === 200) {
@@ -58,6 +61,7 @@ export default {
           filterBy: this.searchParams.filterBy,
           orderBy: this.searchParams.orderBy,
           pageNumber: this.curPage,
+          pageSize: 10
         }
       });
 

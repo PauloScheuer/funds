@@ -30,9 +30,12 @@ export default {
   },
   methods: {
     async fetchInitialData() {
+      this.curPage = 1;
       const res = await api.get('/relationships/similarFunds', {
         params: {
-          fund: this.$route.params.id
+          fund: this.$route.params.id,
+          pageNumber: this.curPage,
+          pageSize: 10
         }
       });
       if (res.status === 200) {
@@ -45,6 +48,7 @@ export default {
         params: {
           fund: this.$route.params.id,
           pageNumber: this.curPage,
+          pageSize: 10
         }
       });
 

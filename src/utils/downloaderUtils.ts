@@ -2,8 +2,8 @@ import axios from "axios";
 import { load } from "cheerio";
 import fs from "fs";
 import decompress from "decompress";
-import Relationship from "./models/relationship";
-import { collections } from "./services/database.service";
+import Relationship from "../models/relationship";
+import { collections } from "../services/database.service";
 
 const BASE_URL = "https://dados.cvm.gov.br";
 const STR_FILEPATH = "resources/";
