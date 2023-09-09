@@ -3,6 +3,8 @@ import * as dotenv from "dotenv";
 
 export const collections: {
   relationships?: mongoDB.Collection;
+  stocksInsights?: mongoDB.Collection;
+  fundsInsights?: mongoDB.Collection;
 } = {};
 
 export async function connectToDatabase() {
@@ -20,4 +22,16 @@ export async function connectToDatabase() {
   );
 
   collections.relationships = relationshipsCollection;
+
+  const stocksInsightsCollection: mongoDB.Collection = db.collection(
+    process.env.STOCKS_INSIGHTS_COLLECTION_NAME || ""
+  );
+
+  collections.stocksInsights = stocksInsightsCollection;
+
+  const fundsInsightsCollection: mongoDB.Collection = db.collection(
+    process.env.FUNDS_INSIGHTS_COLLECTION_NAME || ""
+  );
+
+  collections.fundsInsights = fundsInsightsCollection;
 }

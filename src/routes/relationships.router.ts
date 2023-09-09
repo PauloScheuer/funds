@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { collections } from "../services/database.service";
 import { calculateJaccardSimilarity } from "../utils/similarityUtils";
-import RelationshipsManager from "../managers/relationships.manager";
+import RelationshipsManager from "../controllers/relationships.controller";
 
 export const relationshipsRouter = express.Router();
 relationshipsRouter.use(express.json());

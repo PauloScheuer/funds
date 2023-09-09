@@ -1,3 +1,4 @@
+import Relationship from "../models/relationship";
 import { collections } from "../services/database.service";
 
 type RequestParams = {
@@ -68,6 +69,11 @@ class RelationshipsManager {
     limit && pipeline.push({ $limit: limit });
 
     return await collections.relationships.aggregate(pipeline).toArray();
+  }
+
+  async refreshPairs(pairs: Relationship[]) {
+    await collections.relationships?.deleteMany({});
+    await collections.relationships?.insertMany(pairs);
   }
 }
 

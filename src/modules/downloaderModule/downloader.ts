@@ -5,6 +5,7 @@ import decompress from "decompress";
 import Relationship from "../../models/relationship";
 import { collections } from "../../services/database.service";
 import { createRecomendations } from "../aprioriModule/apriori";
+import RelationshipsManager from "../../controllers/relationships.controller";
 
 const BASE_URL = "https://dados.cvm.gov.br";
 const STR_FILEPATH = "resources/";
@@ -73,8 +74,7 @@ async function insertIntoDB(strPath: string) {
     });
   });
 
-  await collections.relationships?.deleteMany({});
-  await collections.relationships?.insertMany(pairs);
+  await RelationshipsManager.refreshPairs(pairs);
 }
 
 export default async function downloadResource() {
@@ -89,7 +89,7 @@ export default async function downloadResource() {
           return file.path.startsWith(STR_WANTED_FILE);
         }) || files[0];
       fs.writeFileSync(STR_FILEPATH + STR_LOCAL_FILE, fileWanted.data);
-      insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
+      await insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
 
       createRecomendations();
     }

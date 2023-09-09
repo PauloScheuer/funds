@@ -9,7 +9,7 @@ export default class TwoWayMap {
   }
 
   getValue(id: number) {
-    return this._mapIDToValue.get(id);
+    return this._mapIDToValue.get(id) || "";
   }
 
   getID(value: string) {

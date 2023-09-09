@@ -1,8 +1,9 @@
-import relationshipsManager from "../../managers/relationships.manager";
+import relationshipsManager from "../../controllers/relationships.controller";
 import { collections } from "../../services/database.service";
 import TwoWayMap from "./twoWayMap";
 import EfficientSet from "./effectiveSet";
 import Collection from "./collection";
+import InsightsManager from "../../controllers/insights.controller";
 
 type Rule = {
   first: number[];
@@ -11,24 +12,6 @@ type Rule = {
 };
 
 const dict = new TwoWayMap();
-
-function printCollections(collections: Collection[]) {
-  collections.forEach((collection, i) => {
-    console.log(i);
-    const items = collection.getItems();
-    items.forEach((item, i) => {
-      console.log(" item", i, item.map((id) => dict.getValue(id)).join(" "));
-    });
-  });
-}
-
-function printRules(rules: Rule[]) {
-  rules.forEach((rule) => {
-    const firstValues = rule.first.map((id) => dict.getValue(id));
-    const secondValues = rule.second.map((id) => dict.getValue(id));
-    console.log(firstValues, secondValues, rule.frequency);
-  });
-}
 
 function apriori(items: Set<number>[], threshold: number) {
   let levelZeroCollection = new Collection();
@@ -152,7 +135,7 @@ function generateRulesForItem(
         frequency: partOneFrequency,
       });
     }
-    if (partTwoFrequency >= 0.5) {
+    if (partTwoFrequency >= minFrequency) {
       allRules.push({
         first: partTwo,
         second: partOne,
@@ -200,7 +183,16 @@ function generateAllRules(collections: Collection[], minFrequency: number) {
       );
     }
   }
-  return allRules;
+
+  const allRulesValues = allRules.map((rule) => {
+    return {
+      first: rule.first.map((id) => dict.getValue(id)),
+      second: rule.second.map((id) => dict.getValue(id)),
+      frequency: rule.frequency,
+    };
+  });
+
+  return allRulesValues;
 }
 
 async function createStocksRecomendations() {
@@ -215,7 +207,7 @@ async function createStocksRecomendations() {
 
   const aprioriData = apriori(transactions, nStocksThreshold);
   const allRules = generateAllRules(aprioriData, nStocksMinFrequency);
-  return allRules;
+  await InsightsManager.refreshStocksInsights(allRules);
 }
 
 async function createFundsRecomendations() {
@@ -225,18 +217,19 @@ async function createFundsRecomendations() {
     return new Set<number>(funds.map((fund) => dict.getID(fund)).sort());
   });
 
-  const nFundsThreshold = 78;
+  const nFundsThreshold = 79;
   const nFundsMinFrequency = 0.5;
 
   const aprioriData = apriori(transactions, nFundsThreshold);
   const allRules = generateAllRules(aprioriData, nFundsMinFrequency);
-  return allRules;
+  await InsightsManager.refreshFundsInsights(allRules);
 }
 
 export async function createRecomendations() {
   if (!collections.relationships) {
     return;
   }
+
   await createStocksRecomendations();
   await createFundsRecomendations();
 }
