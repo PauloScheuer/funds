@@ -2,8 +2,9 @@ import axios from "axios";
 import { load } from "cheerio";
 import fs from "fs";
 import decompress from "decompress";
-import Relationship from "../models/relationship";
-import { collections } from "../services/database.service";
+import Relationship from "../../models/relationship";
+import { collections } from "../../services/database.service";
+import { createRecomendations } from "../aprioriModule/apriori";
 
 const BASE_URL = "https://dados.cvm.gov.br";
 const STR_FILEPATH = "resources/";
@@ -89,6 +90,8 @@ export default async function downloadResource() {
         }) || files[0];
       fs.writeFileSync(STR_FILEPATH + STR_LOCAL_FILE, fileWanted.data);
       insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
+
+      createRecomendations();
     }
   } catch (e) {
     console.log("error", e);

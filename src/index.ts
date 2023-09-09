@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-import downloadResource from "./utils/downloaderUtils";
+import downloader from "./modules/downloaderModule/downloader";
 import { connectToDatabase } from "./services/database.service";
 import { relationshipsRouter } from "./routes/relationships.router";
-import { createRecomendations } from "./utils/aprioriUtils";
+import { createRecomendations } from "./modules/aprioriModule/apriori";
 
 const app = express();
 app.use(cors());
@@ -17,6 +17,5 @@ connectToDatabase().then(() => {
   app.use("/relationships", relationshipsRouter);
   app.listen(3333);
 
-  downloadResource();
-  createRecomendations();
+  downloader();
 });
