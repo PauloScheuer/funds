@@ -15,9 +15,17 @@ export default class Collection {
   }
 
   getItems() {
-    return Array.from(this._items.keys())
-      .sort()
-      .map((item) => item.split("_").map((strItem) => Number(strItem)));
+    return Array.from(this._items.keys()).map((item) =>
+      item.split("_").map((strItem) => Number(strItem))
+    );
+  }
+
+  getKeys() {
+    return Array.from(this._items.keys());
+  }
+
+  getFrequency(key: string) {
+    return this._items.get(key) || 0;
   }
 
   cut(threshold: number) {

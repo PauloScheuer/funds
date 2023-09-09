@@ -4,6 +4,12 @@ import TwoWayMap from "./twoWayMap";
 import EfficientSet from "./effectiveSet";
 import Collection from "./collection";
 
+type Rule = {
+  first: number[];
+  second: number[];
+  frequency: number;
+};
+
 const dict = new TwoWayMap();
 
 function printCollections(collections: Collection[]) {
@@ -13,6 +19,14 @@ function printCollections(collections: Collection[]) {
     items.forEach((item, i) => {
       console.log(" item", i, item.map((id) => dict.getValue(id)).join(" "));
     });
+  });
+}
+
+function printRules(rules: Rule[]) {
+  rules.forEach((rule) => {
+    const firstValues = rule.first.map((id) => dict.getValue(id));
+    const secondValues = rule.second.map((id) => dict.getValue(id));
+    console.log(firstValues, secondValues, rule.frequency);
   });
 }
 
@@ -65,7 +79,7 @@ function apriori(items: Set<number>[], threshold: number) {
     k++;
   }
 
-  return collections;
+  return collections.splice(0, collections.length - 1);
 }
 
 function generateCandidates(lastCollection: Collection) {
@@ -99,33 +113,130 @@ function generateCandidates(lastCollection: Collection) {
   });
 }
 
+function generateRulesForItem(
+  allRules: Rule[],
+  minFrequency: number,
+  elements: number[],
+  originalPartOne: number[],
+  collections: Collection[],
+  originalFrequency: number,
+  level: number,
+  startK: number,
+  stopLevel: number
+) {
+  if (level === stopLevel - 1) {
+    return;
+  }
+
+  for (let k = startK; k < elements.length; k++) {
+    const newElements = [...elements];
+    const newElement = newElements.splice(k, 1);
+
+    const partOne = [...originalPartOne, ...newElement];
+    const partTwo = [...newElements];
+
+    const partOneKey = partOne.join("_");
+    const partTwoKey = partTwo.join("_");
+
+    const partOneFrequency =
+      originalFrequency /
+      collections[partOne.length - 1].getFrequency(partOneKey);
+
+    const partTwoFrequency =
+      originalFrequency / collections[level - 1].getFrequency(partTwoKey);
+
+    if (partOneFrequency >= minFrequency) {
+      allRules.push({
+        first: partOne,
+        second: partTwo,
+        frequency: partOneFrequency,
+      });
+    }
+    if (partTwoFrequency >= 0.5) {
+      allRules.push({
+        first: partTwo,
+        second: partOne,
+        frequency: partTwoFrequency,
+      });
+    }
+    generateRulesForItem(
+      allRules,
+      minFrequency,
+      partTwo,
+      partOne,
+      collections,
+      originalFrequency,
+      level - 1,
+      k,
+      stopLevel
+    );
+    if (stopLevel === 1) {
+      break;
+    }
+  }
+}
+
+function generateAllRules(collections: Collection[], minFrequency: number) {
+  const allRules: Rule[] = [];
+  for (let i = 1; i < collections.length; i++) {
+    const collection = collections[i];
+    const items = collection.getItems();
+    const keys = collection.getKeys();
+    for (let j = 0; j < items.length; j++) {
+      const key = keys[j];
+      const elements = items[j];
+      const thisFrequency = collection.getFrequency(key);
+      const nStopLevel = Math.ceil(elements.length / 2);
+      generateRulesForItem(
+        allRules,
+        minFrequency,
+        elements,
+        [],
+        collections,
+        thisFrequency,
+        i,
+        0,
+        nStopLevel
+      );
+    }
+  }
+  return allRules;
+}
+
 async function createStocksRecomendations() {
   const funds = await relationshipsManager.getFunds({});
   const transactions = funds.map((pair) => {
-    const stocks = (pair.stocks as string[]).sort();
-    return new Set<number>(stocks.map((stock) => dict.getID(stock)));
+    const stocks = pair.stocks as string[];
+    return new Set<number>(stocks.map((stock) => dict.getID(stock)).sort());
   });
 
   const nStocksThreshold = 60;
-  return apriori(transactions, nStocksThreshold);
+  const nStocksMinFrequency = 0.5;
+
+  const aprioriData = apriori(transactions, nStocksThreshold);
+  const allRules = generateAllRules(aprioriData, nStocksMinFrequency);
+  return allRules;
 }
 
 async function createFundsRecomendations() {
   const stocks = await relationshipsManager.getStocks({});
-  const funds = stocks.map((pair) => {
-    const funds = (pair.funds as string[]).sort();
-    return new Set<number>(funds.map((fund) => dict.getID(fund)));
+  const transactions = stocks.map((pair) => {
+    const funds = pair.funds as string[];
+    return new Set<number>(funds.map((fund) => dict.getID(fund)).sort());
   });
 
-  const nFundsThreshold = 75;
-  return apriori(funds, nFundsThreshold);
+  const nFundsThreshold = 78;
+  const nFundsMinFrequency = 0.5;
+
+  const aprioriData = apriori(transactions, nFundsThreshold);
+  const allRules = generateAllRules(aprioriData, nFundsMinFrequency);
+  return allRules;
 }
 
 export async function createRecomendations() {
   if (!collections.relationships) {
     return;
   }
-
-  createStocksRecomendations();
-  createFundsRecomendations();
+  await createStocksRecomendations();
+  await createFundsRecomendations();
 }

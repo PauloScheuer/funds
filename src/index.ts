@@ -18,4 +18,5 @@ connectToDatabase().then(() => {
   app.listen(3333);
 
   downloader();
+  createRecomendations();
 });
