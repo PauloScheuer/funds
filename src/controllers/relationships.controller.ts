@@ -8,7 +8,7 @@ type RequestParams = {
   reqPageNumber?: number;
 };
 
-class RelationshipsManager {
+class RelationshipsController {
   constructor() {}
 
   async getFunds({
@@ -77,4 +77,4 @@ class RelationshipsManager {
   }
 }
 
-export default new RelationshipsManager();
+export default new RelationshipsController();

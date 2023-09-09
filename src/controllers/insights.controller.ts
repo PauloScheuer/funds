@@ -2,7 +2,7 @@ import { AnyBulkWriteOperation } from "mongodb";
 import Insight from "../models/insight";
 import { collections } from "../services/database.service";
 
-class InsightsManager {
+class InsightsController {
   constructor() {}
 
   async getStocksInsights() {}
@@ -66,4 +66,4 @@ class InsightsManager {
   }
 }
 
-export default new InsightsManager();
+export default new InsightsController();

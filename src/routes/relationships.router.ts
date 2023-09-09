@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { collections } from "../services/database.service";
 import { calculateJaccardSimilarity } from "../utils/similarityUtils";
-import RelationshipsManager from "../controllers/relationships.controller";
+import RelationshipsController from "../controllers/relationships.controller";
 
 export const relationshipsRouter = express.Router();
 relationshipsRouter.use(express.json());
@@ -25,7 +25,7 @@ relationshipsRouter.get("/funds", async (req: Request, res: Response) => {
       ? Number(req.query.pageSize)
       : undefined;
 
-    const funds = await RelationshipsManager.getFunds({
+    const funds = await RelationshipsController.getFunds({
       reqFilterBy,
       reqOrderBy,
       reqPageSize,
@@ -57,7 +57,7 @@ relationshipsRouter.get("/stocks", async (req: Request, res: Response) => {
       ? Number(req.query.pageSize)
       : undefined;
 
-    const stocks = await RelationshipsManager.getStocks({
+    const stocks = await RelationshipsController.getStocks({
       reqFilterBy,
       reqOrderBy,
       reqPageSize,
@@ -94,7 +94,7 @@ relationshipsRouter.get(
       const skip = reqPageNumber ? reqPageNumber - 1 : 0;
       const limit = reqPageSize || 10;
 
-      const allFunds = await RelationshipsManager.getFunds({});
+      const allFunds = await RelationshipsController.getFunds({});
 
       const requestedFundIndex = allFunds.findIndex(
         (entry) => entry.fund === fund

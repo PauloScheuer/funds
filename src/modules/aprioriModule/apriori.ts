@@ -1,9 +1,9 @@
-import relationshipsManager from "../../controllers/relationships.controller";
+import RelationshipsController from "../../controllers/relationships.controller";
 import { collections } from "../../services/database.service";
 import TwoWayMap from "./twoWayMap";
 import EfficientSet from "./effectiveSet";
 import Collection from "./collection";
-import InsightsManager from "../../controllers/insights.controller";
+import InsightsController from "../../controllers/insights.controller";
 
 type Rule = {
   first: number[];
@@ -196,7 +196,7 @@ function generateAllRules(collections: Collection[], minFrequency: number) {
 }
 
 async function createStocksRecomendations() {
-  const funds = await relationshipsManager.getFunds({});
+  const funds = await RelationshipsController.getFunds({});
   const transactions = funds.map((pair) => {
     const stocks = pair.stocks as string[];
     return new Set<number>(stocks.map((stock) => dict.getID(stock)).sort());
@@ -207,11 +207,11 @@ async function createStocksRecomendations() {
 
   const aprioriData = apriori(transactions, nStocksThreshold);
   const allRules = generateAllRules(aprioriData, nStocksMinFrequency);
-  await InsightsManager.refreshStocksInsights(allRules);
+  await InsightsController.refreshStocksInsights(allRules);
 }
 
 async function createFundsRecomendations() {
-  const stocks = await relationshipsManager.getStocks({});
+  const stocks = await RelationshipsController.getStocks({});
   const transactions = stocks.map((pair) => {
     const funds = pair.funds as string[];
     return new Set<number>(funds.map((fund) => dict.getID(fund)).sort());
@@ -222,7 +222,7 @@ async function createFundsRecomendations() {
 
   const aprioriData = apriori(transactions, nFundsThreshold);
   const allRules = generateAllRules(aprioriData, nFundsMinFrequency);
-  await InsightsManager.refreshFundsInsights(allRules);
+  await InsightsController.refreshFundsInsights(allRules);
 }
 
 export async function createRecomendations() {
