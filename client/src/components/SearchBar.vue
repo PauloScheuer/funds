@@ -30,7 +30,7 @@ export default {
 <style scoped>
 .item-search {
   background-color: white;
-  width: 500px;
+  width: auto;
   padding: 8px;
   border-radius: 5px;
   margin-bottom: 24px;

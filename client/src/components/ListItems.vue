@@ -32,7 +32,7 @@
     </div>
   </div>
   <div class="item-content-more" @click="$emit('requestMoreItems')">
-    <VueFeather size="32" type="plus" />
+    <VueFeather size="24" type="plus" />
   </div>
 </template>
 <script lang="ts">
@@ -91,7 +91,7 @@ export default {
   margin-bottom: 8px;
   border-radius: 5px;
   padding: 8px;
-  width: 500px;
+  width: auto;
 }
 
 .item-header {
@@ -152,7 +152,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: color 0.5s;
-  width: 500px;
+  width: auto;
   padding: 0px 8px;
   text-align: center;
 }

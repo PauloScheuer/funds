@@ -12,18 +12,22 @@
     <SearchBar :search-key="searchKey" :order-by="tempSearchParams.orderBy" :value="tempSearchParams.filterBy"
       @change-filter="handleChangeFilter" @change-order="handleChangeOrder" @search="fetchInitialData" />
 
-    <div class="insight" v-for="insight in insights">
+    <div class="insight" v-for="insight in  insights ">
       <div class="data">
-        <div class="items" :class="mode === stock ? 'stock-items' : 'fund-items'">
-          <span v-for="item in insight.first" class="item" :class="mode === stock ? 'stock-item' : 'fund-item'">{{ item
-          }}</span>
+        <div class="items">
+          <div v-for="item in  insight.first " class="item" :class="mode === stock ? 'stock-item' : 'fund-item'">
+            <p>{{ item.name }}</p>
+            <p> {{ item.key }}</p>
+          </div>
         </div>
-        <div class="arrow">
+        <div class=" arrow">
           <VueFeather size="16" type="arrow-right" />
         </div>
-        <div class="items" :class="mode === stock ? 'stock-items' : 'fund-items'">
-          <span v-for="item in insight.second" class="item" :class="mode === stock ? 'stock-item' : 'fund-item'">{{ item
-          }}</span>
+        <div class="items">
+          <div v-for=" item  in  insight.second " class="item" :class="mode === stock ? 'stock-item' : 'fund-item'">
+            <p>{{ item.name }}</p>
+            <p>{{ item.key }}</p>
+          </div>
         </div>
       </div>
       <div class="frequency">
@@ -31,7 +35,7 @@
       </div>
     </div>
     <div class="more-insights" @click="loadMoreInsights">
-      <VueFeather size="32" type="plus" />
+      <VueFeather size="24" type="plus" />
     </div>
   </div>
 </template>
@@ -42,9 +46,14 @@ import SearchBar from '@/components/SearchBar.vue';
 import api from '@/services/api';
 import VueFeather from 'vue-feather';
 
+type ElOfInsight = {
+  key: string,
+  name: string
+}
+
 type Insight = {
-  first: string[],
-  second: string[],
+  first: ElOfInsight[],
+  second: ElOfInsight[],
   frequency: number
 }
 
@@ -119,10 +128,10 @@ export default {
   computed: {
     searchKey() {
       if (this.mode === Mode.stock) {
-        return 'ticker';
+        return 'ticker or a name';
       }
 
-      return 'CNPJ';
+      return 'CNPJ or a name';
     },
     searchPath() {
       if (this.mode === Mode.stock) {
@@ -183,7 +192,8 @@ export default {
   margin-bottom: 8px;
   border-radius: 5px;
   padding: 16px 8px;
-  width: 500px;
+  width: auto;
+  ;
   display: flex;
   align-items: center;
 }
@@ -196,39 +206,36 @@ export default {
 }
 
 .items {
-  display: grid;
   gap: 10px;
-  max-width: 45%;
-  width: fit-content;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.stock-items {
-  grid-template-columns: repeat(auto-fit, 80px);
+.item {
+  padding: 6px 20px;
+  background-color: #f0f0f0;
+  border-radius: 50px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  gap: 5px;
+  flex-grow: 1;
 }
 
-.fund-items {
-  grid-template-columns: repeat(auto-fit, 180px);
+.stock-item {
+  min-width: 100px;
+}
+
+.fund-item {
+  min-width: 200px;
 }
 
 .arrow {
   display: flex;
   justify-content: center;
-  width: 10%;
-}
-
-.item {
-  padding: 4px 10px;
-  background-color: #f0f0f0;
-  border-radius: 15px;
-  text-align: center;
-}
-
-.stock-item {
-  width: 60px;
-}
-
-.fund-item {
-  width: 160px;
 }
 
 .frequency {
@@ -245,7 +252,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: color 0.5s;
-  width: 500px;
+  width: auto;
   padding: 0px 8px;
   text-align: center;
 }

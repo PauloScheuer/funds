@@ -11,7 +11,8 @@ type Rule = {
   frequency: number;
 };
 
-const dict = new TwoWayMap();
+const dictKeys = new TwoWayMap();
+const dictNames = new Map<number, string>();
 
 function apriori(items: Set<number>[], threshold: number) {
   let levelZeroCollection = new Collection();
@@ -186,8 +187,18 @@ function generateAllRules(collections: Collection[], minFrequency: number) {
 
   const allRulesValues = allRules.map((rule) => {
     return {
-      first: rule.first.map((id) => dict.getValue(id)),
-      second: rule.second.map((id) => dict.getValue(id)),
+      first: rule.first.map((id) => {
+        return {
+          key: dictKeys.getValue(id),
+          name: dictNames.get(id) || "",
+        };
+      }),
+      second: rule.second.map((id) => {
+        return {
+          key: dictKeys.getValue(id),
+          name: dictNames.get(id) || "",
+        };
+      }),
       frequency: rule.frequency,
     };
   });
@@ -199,7 +210,16 @@ async function createStocksRecomendations() {
   const funds = await RelationshipsController.getFunds({});
   const transactions = funds.map((pair) => {
     const stocks = pair.stocks as string[];
-    return new Set<number>(stocks.map((stock) => dict.getID(stock)).sort());
+    const stocksPretty = pair.stocksPretty as string[];
+    return new Set<number>(
+      stocks
+        .map((stock, index) => {
+          const id = dictKeys.getID(stock);
+          dictNames.set(id, stocksPretty[index]);
+          return id;
+        })
+        .sort()
+    );
   });
 
   const nStocksThreshold = 60;
@@ -214,7 +234,16 @@ async function createFundsRecomendations() {
   const stocks = await RelationshipsController.getStocks({});
   const transactions = stocks.map((pair) => {
     const funds = pair.funds as string[];
-    return new Set<number>(funds.map((fund) => dict.getID(fund)).sort());
+    const fundsPretty = pair.fundsPretty as string[];
+    return new Set<number>(
+      funds
+        .map((fund, index) => {
+          const id = dictKeys.getID(fund);
+          dictNames.set(id, fundsPretty[index]);
+          return id;
+        })
+        .sort()
+    );
   });
 
   const nFundsThreshold = 79;

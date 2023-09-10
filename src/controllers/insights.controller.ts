@@ -19,8 +19,10 @@ class InsightsController {
     const match = reqFilterBy
       ? {
           $or: [
-            { first: new RegExp(`.*${reqFilterBy}.*`) },
-            { second: new RegExp(`.*${reqFilterBy}.*`) },
+            { "first.key": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
+            { "first.name": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
+            { "second.key": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
+            { "second.name": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
           ],
         }
       : {};
@@ -80,8 +82,10 @@ class InsightsController {
     const match = reqFilterBy
       ? {
           $or: [
-            { first: new RegExp(`.*${reqFilterBy}.*`) },
-            { second: new RegExp(`.*${reqFilterBy}.*`) },
+            { "first.key": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
+            { "first.name": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
+            { "second.key": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
+            { "second.name": new RegExp(`.*${reqFilterBy.toUpperCase()}.*`) },
           ],
         }
       : {};

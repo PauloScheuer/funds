@@ -105,8 +105,7 @@ body {
   width: calc(100vw - 330px);
   height: calc(100vh - 20px);
   border-radius: 5px;
-  margin-top: 10px;
-  margin-left: 10px;
+  padding: 10px;
   overflow-y: scroll;
 }
 
@@ -137,7 +136,7 @@ body {
   padding: 8px;
   border-radius: 5px;
   width: fit-content;
-  max-width: 500px;
+  max-width: auto;
   box-shadow: 2px 2px 0px 0px #2ECC71;
 }
 </style>
