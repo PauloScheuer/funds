@@ -1,6 +1,7 @@
 <template>
   <div class="content-container">
-    <PageHeader title="Insights" :text="[]" />
+    <PageHeader title="Insights"
+      :text="['Here, you can find valuable insights about funds and stocks', 'Each item shows a condition and an implication, along with the frequency that it is true']" />
     <div class="mode-selector">
       <div class="mode-option" :class="mode === fund && 'mode-option-selected'" @click="mode === stock && (mode = fund)">
         Fund insights</div>
@@ -150,6 +151,7 @@ export default {
 </script>
 <style scoped>
 .mode-selector {
+  margin-top: 32px;
   display: flex;
   gap: 10px;
 }
