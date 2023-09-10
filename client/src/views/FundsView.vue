@@ -3,9 +3,9 @@
     <PageHeader title="Funds"
       :text="['In this page, you can take a look at Brazilian stock funds and their portfolio.', 'Feel free to filter and order the results acording to you criteria.', 'By clicking on the zap icon on each fund you can see others similar to it!']" />
     <h3 class="subtitle">List of funds:</h3>
-    <SearchBar search-key="CNPJ" :order-by="tempSearchParams.orderBy" @change-filter="handleChangeFilter"
+    <SearchBar search-key="CNPJ or a name" :order-by="tempSearchParams.orderBy" @change-filter="handleChangeFilter"
       :value="tempSearchParams.filterBy" @change-order="handleChangeOrder" @search="fetchInitialData" />
-    <ListItems sublabel="stocks" :items="items" @request-more-items="loadMoreFunds()" :similar-url="'similarFunds'" />
+    <ListItems sublabel="stock(s)" :items="items" @request-more-items="loadMoreFunds()" :similar-url="'similarFunds'" />
   </div>
 </template>
 <script lang="ts">
@@ -17,7 +17,9 @@ import VueFeather from 'vue-feather';
 
 type Fund = {
   fund: string,
-  stocks: string[]
+  fundPretty: string,
+  stocks: string[],
+  stocksPretty: string[]
 }
 
 export default {
@@ -82,7 +84,10 @@ export default {
       return this.funds.map(item => {
         return {
           key: item.fund,
-          list: item.stocks
+          name: item.fundPretty,
+          list: item.stocks.map((stock, index) => {
+            return `${item.stocksPretty[index]} (${stock})`
+          })
         }
       })
     }

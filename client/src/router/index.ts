@@ -24,7 +24,7 @@ const router = createRouter({
       component: StocksView
     },
     {
-      path: '/similarFunds/:id',
+      path: '/similarFunds/',
       name: 'similarFunds',
       component: SimilarFundsView
     },

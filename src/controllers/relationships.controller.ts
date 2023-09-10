@@ -14,17 +14,44 @@ class RelationshipsController {
     if (!collections.relationships) {
       return [];
     }
-
     const match = reqFilterBy
-      ? { fund: { $regex: reqFilterBy.replace(".", "\\.") } }
+      ? {
+          $or: [
+            {
+              fund: {
+                $regex: reqFilterBy.toLocaleUpperCase().replace(".", "\\."),
+              },
+            },
+            {
+              fundPretty: {
+                $regex: reqFilterBy.toLocaleUpperCase().replace(".", "\\."),
+              },
+            },
+          ],
+        }
       : {};
     const orderBy = { fund: reqOrderBy || 1 };
     const limit = reqPageSize;
     const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * (limit || 0);
 
     const pipeline = [
-      { $group: { _id: "$fund", stocks: { $push: "$stock" } } },
-      { $project: { _id: 0, fund: "$_id", stocks: 1 } },
+      {
+        $group: {
+          _id: "$fund",
+          fundPretty: { $first: "$fundPretty" },
+          stocks: { $push: "$stock" },
+          stocksPretty: { $push: "$stockPretty" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          fund: "$_id",
+          fundPretty: 1,
+          stocks: 1,
+          stocksPretty: 1,
+        },
+      },
     ] as Object[];
 
     match && pipeline.push({ $match: match });
@@ -46,15 +73,37 @@ class RelationshipsController {
     }
 
     const match = reqFilterBy
-      ? { stock: new RegExp(`.*${reqFilterBy}.*`) }
+      ? {
+          $or: [
+            { stock: new RegExp(`.*${reqFilterBy.toLocaleUpperCase()}.*`) },
+            {
+              stockPretty: new RegExp(`.*${reqFilterBy.toLocaleUpperCase()}.*`),
+            },
+          ],
+        }
       : {};
     const orderBy = { stock: reqOrderBy || 1 };
     const limit = reqPageSize;
     const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * (limit || 0);
 
     const pipeline = [
-      { $group: { _id: "$stock", funds: { $push: "$fund" } } },
-      { $project: { _id: 0, stock: "$_id", funds: 1 } },
+      {
+        $group: {
+          _id: "$stock",
+          stockPretty: { $first: "$stockPretty" },
+          funds: { $push: "$fund" },
+          fundsPretty: { $push: "$fundPretty" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          stock: "$_id",
+          stockPretty: 1,
+          funds: 1,
+          fundsPretty: 1,
+        },
+      },
     ] as Object[];
 
     match && pipeline.push({ $match: match });

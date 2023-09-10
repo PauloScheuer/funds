@@ -51,8 +51,10 @@ async function downloadZIP() {
 
 async function insertIntoDB(strPath: string) {
   const N_CNPJ = 1;
+  const N_DENOM = 2;
   const N_TYPE = 4;
   const N_ASSET = 16;
+  const N_COMPANY = 17;
   const STR_STOCKS = "Ações";
 
   const data = fs.readFileSync(strPath, { encoding: "latin1" }).split(/\r?\n/);
@@ -61,15 +63,19 @@ async function insertIntoDB(strPath: string) {
   data.forEach((entry) => {
     const entryData = entry.split(";");
     const cnpj = entryData[N_CNPJ];
+    const denom = entryData[N_DENOM];
     const type = entryData[N_TYPE];
     const asset = entryData[N_ASSET];
+    const company = entryData[N_COMPANY];
     if (type !== STR_STOCKS) {
       return;
     }
 
     pairs.push({
       fund: cnpj,
+      fundPretty: denom,
       stock: asset,
+      stockPretty: company,
     });
   });
 

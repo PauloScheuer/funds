@@ -3,7 +3,7 @@
     <div class="item-header">
       <p class="item-title">
         <span>
-          {{ item.key }}
+          {{ `${item.name} - (${item.key})` }}
         </span>
         <span v-if="sublabel">
           - {{ item.list.length }} {{ sublabel }}
@@ -11,8 +11,9 @@
         <span v-if="extraLabel"> - {{ extraLabel.label((item as any)[extraLabel.prop]) }}
         </span>
       </p>
-      <div>
-        <RouterLink :to="`${similarUrl}/${encodeURIComponent(item.key)}`" class="page-link" v-if="similarUrl">
+      <div class="functions">
+        <RouterLink :to="`${similarUrl}/?id=${encodeURIComponent(item.key)}&name=${encodeURIComponent(item.name)}`"
+          class="page-link" v-if="similarUrl">
           <VueFeather size="24" type="zap" class="item-icon" />
         </RouterLink>
         <VueFeather size="24" :type="item.isOpen ? 'chevron-up' : 'chevron-down'" class="item-icon"
@@ -22,8 +23,10 @@
     <div class="item-content" :class="item.isOpen && 'item-content-open'">
       <div class="item-content-inner">
         <div v-for="listItem in item.list" class="item-subitem">
-          <VueFeather size="8" type="disc" class="item-subitem-icon" />
-          <p>{{ listItem }}</p>
+          <div class="item-subitem-icon-container">
+            <VueFeather size="8" type="disc" class="item-subitem-icon" />
+          </div>
+          <p class="item-subitem-text">{{ listItem }}</p>
         </div>
       </div>
     </div>
@@ -38,11 +41,13 @@ import ExtraLabel from '@/common/ExtraLabel';
 
 type Item = {
   key: string,
+  name: string,
   list: string[]
 }
 
 type LocalItem = {
   key: string,
+  name: string,
   list: string[],
   isOpen: boolean
 }
@@ -125,13 +130,21 @@ export default {
 .item-subitem {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.item-subitem-icon-container {
+  display: flex;
+  align-items: center;
 }
 
 .item-subitem-icon {
   color: #2ECC71;
+}
+
+.item-subitem-text {
+  font-size: 14px;
 }
 
 .item-content-more {
@@ -152,5 +165,9 @@ export default {
   text-decoration: none;
   color: black;
   margin-right: 4px;
+}
+
+.functions {
+  display: flex;
 }
 </style>

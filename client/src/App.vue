@@ -117,7 +117,7 @@ body {
 .title {
   color: #2ECC71;
   font-weight: bold;
-  font-size: 48px;
+  font-size: 40px;
   margin-bottom: 40px;
   text-transform: capitalize;
 }
@@ -137,6 +137,7 @@ body {
   padding: 8px;
   border-radius: 5px;
   width: fit-content;
+  max-width: 500px;
   box-shadow: 2px 2px 0px 0px #2ECC71;
 }
 </style>

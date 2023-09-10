@@ -45,6 +45,7 @@ export default {
   padding: 8px;
   border-radius: 5px;
   font-size: 14px;
+  width: 200px
 }
 
 .item-search-input:focus {

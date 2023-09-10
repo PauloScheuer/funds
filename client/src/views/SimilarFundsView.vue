@@ -1,9 +1,9 @@
 <template>
   <div class="content-container">
-    <PageHeader :title="`Similar Funds to ${$route.params.id}`"
-      :text="[`This page shows funds ranked by their similarity with ${$route.params.id}`]" />
+    <PageHeader :title="`Similar Funds to ${$route.query.name} (${$route.query.id})`"
+      :text="[`This page shows funds ranked by their similarity with ${$route.query.name} (${$route.query.id})`]" />
     <h3 class="subtitle">List of similar funds:</h3>
-    <ListItems :items="items" @request-more-items="loadMoreFunds" sublabel="stocks" :extra-label="extraLabel" />
+    <ListItems :items="items" @request-more-items="loadMoreFunds" sublabel="stock(s)" :extra-label="extraLabel" />
   </div>
 </template>
 <script lang="ts">
@@ -14,7 +14,9 @@ import ExtraLabel from '@/common/ExtraLabel';
 
 type SimilarFund = {
   fund: string,
+  fundPretty: string,
   stocks: string[],
+  stocksPretty: string[],
   similarity: number
 }
 
@@ -33,7 +35,7 @@ export default {
       this.curPage = 1;
       const res = await api.get('/relationships/similarFunds', {
         params: {
-          fund: this.$route.params.id,
+          fund: this.$route.query.id,
           pageNumber: this.curPage,
           pageSize: 10
         }
@@ -46,7 +48,7 @@ export default {
       this.curPage++;
       const res = await api.get('/relationships/similarFunds', {
         params: {
-          fund: this.$route.params.id,
+          fund: this.$route.query.id,
           pageNumber: this.curPage,
           pageSize: 10
         }
@@ -67,7 +69,10 @@ export default {
       return this.funds.map(item => {
         return {
           key: item.fund,
-          list: item.stocks,
+          name: item.fundPretty,
+          list: item.stocks.map((stock, index) => {
+            return `${item.stocksPretty[index]} (${stock})`
+          }),
           similarity: item.similarity,
         }
       })
