@@ -26,12 +26,12 @@ export async function connectToDatabase() {
   const stocksInsightsCollection: mongoDB.Collection = db.collection(
     process.env.STOCKS_INSIGHTS_COLLECTION_NAME || ""
   );
-
+  stocksInsightsCollection.createIndex({ frequency: -1 });
   collections.stocksInsights = stocksInsightsCollection;
 
   const fundsInsightsCollection: mongoDB.Collection = db.collection(
     process.env.FUNDS_INSIGHTS_COLLECTION_NAME || ""
   );
-
+  fundsInsightsCollection.createIndex({ frequency: -1 });
   collections.fundsInsights = fundsInsightsCollection;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="item-search">
-    <input type="text" :placeholder="`Search for a ${searchKey}`" class="item-search-input"
+    <input type="text" :placeholder="`Search for a ${searchKey}`" class="item-search-input" :value="value"
       @input="$event => $emit('changeFilter', $event)" />
     <div class="item-search-order">
       <span class="item-search-order-title">Order:</span>
@@ -17,6 +17,7 @@ export default {
   props: {
     orderBy: { type: Number, required: true },
     searchKey: { type: String, required: true },
+    value: { type: String, required: true }
   },
   emits: {
     changeFilter: (event: Event) => true,

@@ -21,7 +21,10 @@
     </div>
     <div class="item-content" :class="item.isOpen && 'item-content-open'">
       <div class="item-content-inner">
-        <p v-for="listItem in item.list" class="item-subitem">{{ listItem }}</p>
+        <div v-for="listItem in item.list" class="item-subitem">
+          <VueFeather size="8" type="disc" class="item-subitem-icon" />
+          <p>{{ listItem }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -93,7 +96,6 @@ export default {
 }
 
 .item-title {
-  font-size: 20px;
   font-weight: 500;
 }
 
@@ -121,8 +123,15 @@ export default {
 }
 
 .item-subitem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 14px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.item-subitem-icon {
+  color: #2ECC71;
 }
 
 .item-content-more {
