@@ -1,11 +1,42 @@
 import { AnyBulkWriteOperation } from "mongodb";
 import Insight from "../models/insight";
 import { collections } from "../services/database.service";
+import { RequestParams } from "../types/requestParams";
 
 class InsightsController {
   constructor() {}
 
-  async getStocksInsights() {}
+  async getStocksInsights({
+    reqFilterBy,
+    reqOrderBy,
+    reqPageSize,
+    reqPageNumber,
+  }: RequestParams) {
+    if (!collections.stocksInsights) {
+      return [];
+    }
+
+    const match = reqFilterBy
+      ? {
+          $or: [
+            { first: new RegExp(`.*${reqFilterBy}.*`) },
+            { second: new RegExp(`.*${reqFilterBy}.*`) },
+          ],
+        }
+      : {};
+    const orderBy = { frequency: reqOrderBy || -1 };
+    const limit = reqPageSize;
+    const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * (limit || 0);
+
+    const pipeline = [] as Object[];
+
+    match && pipeline.push({ $match: match });
+    orderBy && pipeline.push({ $sort: orderBy });
+    skip && pipeline.push({ $skip: skip });
+    limit && pipeline.push({ $limit: limit });
+
+    return await collections.stocksInsights.aggregate(pipeline).toArray();
+  }
 
   async refreshStocksInsights(insights: Insight[]) {
     try {
@@ -34,6 +65,38 @@ class InsightsController {
     } catch (e) {
       console.log("insert error", (e as any)?.message);
     }
+  }
+
+  async getFundsInsights({
+    reqFilterBy,
+    reqOrderBy,
+    reqPageSize,
+    reqPageNumber,
+  }: RequestParams) {
+    if (!collections.fundsInsights) {
+      return [];
+    }
+
+    const match = reqFilterBy
+      ? {
+          $or: [
+            { first: new RegExp(`.*${reqFilterBy}.*`) },
+            { second: new RegExp(`.*${reqFilterBy}.*`) },
+          ],
+        }
+      : {};
+    const orderBy = { frequency: reqOrderBy || -1 };
+    const limit = reqPageSize;
+    const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * (limit || 0);
+
+    const pipeline = [] as Object[];
+
+    match && pipeline.push({ $match: match });
+    orderBy && pipeline.push({ $sort: orderBy });
+    skip && pipeline.push({ $skip: skip });
+    limit && pipeline.push({ $limit: limit });
+
+    return await collections.fundsInsights.aggregate(pipeline).toArray();
   }
 
   async refreshFundsInsights(insights: Insight[]) {

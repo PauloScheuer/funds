@@ -3,8 +3,8 @@
     <PageHeader title="Stocks"
       :text="['In this page, you can take a look at Brazilian stocks and the funds that contain them on their portfolio.', 'Feel free to filter and order the results acording to you criteria.']" />
     <h3 class="subtitle">List of stocks:</h3>
-    <SearchBar :order-by="tempSearchParams.orderBy" @change-filter="handleChangeFilter" @change-order="handleChangeOrder"
-      @search="fetchInitialData" />
+    <SearchBar search-key="ticker" :order-by="tempSearchParams.orderBy" @change-filter="handleChangeFilter"
+      @change-order="handleChangeOrder" @search="fetchInitialData" />
     <ListItems sublabel="funds" :items="items" @request-more-items="loadMoreStocks()" />
   </div>
 </template>

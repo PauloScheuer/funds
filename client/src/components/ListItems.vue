@@ -3,17 +3,20 @@
     <div class="item-header">
       <p class="item-title">
         <span>
-          {{ item.key }} - {{ item.list.length }} {{ sublabel }}
+          {{ item.key }}
+        </span>
+        <span v-if="sublabel">
+          - {{ item.list.length }} {{ sublabel }}
         </span>
         <span v-if="extraLabel"> - {{ extraLabel.label((item as any)[extraLabel.prop]) }}
         </span>
       </p>
       <div>
-        <RouterLink :to="`similarFunds/${encodeURIComponent(item.key)}`" class="zap-link" v-if="bHasSimilar">
+        <RouterLink :to="`${similarUrl}/${encodeURIComponent(item.key)}`" class="page-link" v-if="similarUrl">
           <VueFeather size="24" type="zap" class="item-icon" />
         </RouterLink>
         <VueFeather size="24" :type="item.isOpen ? 'chevron-up' : 'chevron-down'" class="item-icon"
-          @click="handleExpand(index)" />
+          v-if="item.list.length" @click="handleExpand(index)" />
       </div>
     </div>
     <div class="item-content" :class="item.isOpen && 'item-content-open'">
@@ -45,8 +48,8 @@ export default {
   props: {
     items: { type: Array<Item>, required: true },
     sublabel: { type: String, required: true },
-    bHasSimilar: { type: Boolean },
-    extraLabel: { type: ExtraLabel, validator: () => true }
+    extraLabel: { type: ExtraLabel, validator: () => true },
+    similarUrl: { type: String },
   },
   emits: {
     requestMoreItems: () => true
@@ -136,8 +139,9 @@ export default {
   color: #2ECC71;
 }
 
-.zap-link {
+.page-link {
   text-decoration: none;
   color: black;
+  margin-right: 4px;
 }
 </style>

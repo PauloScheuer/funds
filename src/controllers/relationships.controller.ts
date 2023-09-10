@@ -1,12 +1,6 @@
 import Relationship from "../models/relationship";
 import { collections } from "../services/database.service";
-
-type RequestParams = {
-  reqFilterBy?: string;
-  reqOrderBy?: number;
-  reqPageSize?: number;
-  reqPageNumber?: number;
-};
+import { RequestParams } from "../types/requestParams";
 
 class RelationshipsController {
   constructor() {}
@@ -54,7 +48,7 @@ class RelationshipsController {
     const match = reqFilterBy
       ? { stock: new RegExp(`.*${reqFilterBy}.*`) }
       : {};
-    const orderBy = { fund: reqOrderBy || 1 };
+    const orderBy = { stock: reqOrderBy || 1 };
     const limit = reqPageSize;
     const skip = (reqPageNumber ? reqPageNumber - 1 : 0) * (limit || 0);
 

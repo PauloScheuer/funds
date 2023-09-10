@@ -12,6 +12,7 @@ import VueFeather from 'vue-feather'
         <RouterLink class="link" to="/">Home</RouterLink>
         <RouterLink class="link" to="/funds">Funds</RouterLink>
         <RouterLink class="link" to="/stocks">Stocks</RouterLink>
+        <RouterLink class="link" to="/insights">Insights</RouterLink>
       </div>
       <div class="about">
         <a href="https://www.github.com/PauloScheuer/" class="about-item">
@@ -118,6 +119,7 @@ body {
   font-weight: bold;
   font-size: 48px;
   margin-bottom: 40px;
+  text-transform: capitalize;
 }
 
 .subtitle {
