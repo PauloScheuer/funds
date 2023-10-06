@@ -18,6 +18,4 @@ connectToDatabase().then(() => {
   app.use("/relationships", relationshipsRouter);
   app.use("/insights", insightsRouter);
   app.listen(3333);
-
-  downloader();
 });
