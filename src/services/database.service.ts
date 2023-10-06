@@ -5,6 +5,7 @@ export const collections: {
   relationships?: mongoDB.Collection;
   stocksInsights?: mongoDB.Collection;
   fundsInsights?: mongoDB.Collection;
+  updates?: mongoDB.Collection;
 } = {};
 
 export async function connectToDatabase() {
@@ -34,4 +35,9 @@ export async function connectToDatabase() {
   );
   fundsInsightsCollection.createIndex({ frequency: -1 });
   collections.fundsInsights = fundsInsightsCollection;
+
+  const updatesCollection: mongoDB.Collection = db.collection(
+    process.env.UPDATES_COLLECTION_NAME || ""
+  );
+  collections.updates = updatesCollection;
 }

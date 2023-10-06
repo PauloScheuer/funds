@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const downloader_1 = __importDefault(require("./modules/downloaderModule/downloader"));
 const database_service_1 = require("./services/database.service");
 const relationships_router_1 = require("./routes/relationships.router");
 const insights_router_1 = require("./routes/insights.router");
@@ -14,8 +15,14 @@ app.use(express_1.default.json());
 app.get("/", (req, res) => {
     res.send("hello world");
 });
-(0, database_service_1.connectToDatabase)().then(() => {
+(0, database_service_1.connectToDatabase)()
+    .then(() => {
+    console.log("Connected to DB");
     app.use("/relationships", relationships_router_1.relationshipsRouter);
     app.use("/insights", insights_router_1.insightsRouter);
     app.listen(3333);
+    (0, downloader_1.default)();
+})
+    .catch(() => {
+    console.log("Error connecting to DB");
 });

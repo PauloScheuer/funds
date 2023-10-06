@@ -1,13 +1,12 @@
 import axios from "axios";
 import { load } from "cheerio";
-import fs from "fs";
 import decompress from "decompress";
 import Relationship from "../../models/relationship";
 import { createRecomendations } from "../aprioriModule/apriori";
 import RelationshipsController from "../../controllers/relationships.controller";
+import UpdatesController from "../../controllers/updates.controller";
 
 const BASE_URL = "https://dados.cvm.gov.br";
-const STR_FILEPATH = "resources/";
 
 async function findMostRecentPageHref() {
   const STR_PARENT_SELECTOR = "ul.resource-list";
@@ -34,22 +33,21 @@ async function findMostRecentZipHref() {
   return (htmlResource.attribs as any).href as string;
 }
 
-async function downloadZIP() {
+async function getZIP() {
   const hrefZIP = await findMostRecentZipHref();
   const filename = hrefZIP.split("/").splice(-1)[0];
-  if (fs.existsSync(STR_FILEPATH + filename)) {
-    return "";
+
+  const strLastSaved = await UpdatesController.getMostRecentUpdate();
+
+  if (filename === strLastSaved) {
+    return null;
   }
 
   const res = await axios.get(hrefZIP, { responseType: "arraybuffer" });
-  if (!fs.existsSync(STR_FILEPATH)) {
-    fs.mkdirSync(STR_FILEPATH);
-  }
-  fs.writeFileSync(STR_FILEPATH + filename, res.data);
-  return STR_FILEPATH + filename;
+  return { data: res.data, filename };
 }
 
-async function insertIntoDB(strPath: string) {
+async function insertIntoDB(buffer: Buffer) {
   const N_CNPJ = 1;
   const N_DENOM = 2;
   const N_TYPE = 4;
@@ -57,7 +55,7 @@ async function insertIntoDB(strPath: string) {
   const N_COMPANY = 17;
   const STR_STOCKS = "Ações";
 
-  const data = fs.readFileSync(strPath, { encoding: "latin1" }).split(/\r?\n/);
+  const data = buffer.toString("latin1").split(/\r?\n/);
 
   const pairs: Relationship[] = [];
   data.forEach((entry) => {
@@ -78,24 +76,23 @@ async function insertIntoDB(strPath: string) {
       stockPretty: company,
     });
   });
-
   await RelationshipsController.refreshPairs(pairs);
 }
 
 export default async function downloadResource() {
   const STR_WANTED_FILE = "cda_fi_BLC_4";
-  const STR_LOCAL_FILE = "compositions.csv";
+
   try {
-    const zipPath = await downloadZIP();
-    if (zipPath) {
-      const files = await decompress(zipPath);
+    const zipFile = await getZIP();
+    if (zipFile) {
+      const files = await decompress(zipFile.data);
       const fileWanted =
         files.find((file) => {
           return file.path.startsWith(STR_WANTED_FILE);
         }) || files[0];
-      fs.writeFileSync(STR_FILEPATH + STR_LOCAL_FILE, fileWanted.data);
-      await insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
 
+      await insertIntoDB(fileWanted.data);
+      await UpdatesController.insertNewUpdate(zipFile.filename);
       createRecomendations();
     }
   } catch (e) {

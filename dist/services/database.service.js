@@ -50,6 +50,8 @@ function connectToDatabase() {
         const fundsInsightsCollection = db.collection(process.env.FUNDS_INSIGHTS_COLLECTION_NAME || "");
         fundsInsightsCollection.createIndex({ frequency: -1 });
         exports.collections.fundsInsights = fundsInsightsCollection;
+        const updatesCollection = db.collection(process.env.UPDATES_COLLECTION_NAME || "");
+        exports.collections.updates = updatesCollection;
     });
 }
 exports.connectToDatabase = connectToDatabase;

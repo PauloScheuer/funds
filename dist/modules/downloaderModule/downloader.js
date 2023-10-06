@@ -14,12 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const cheerio_1 = require("cheerio");
-const fs_1 = __importDefault(require("fs"));
 const decompress_1 = __importDefault(require("decompress"));
 const apriori_1 = require("../aprioriModule/apriori");
 const relationships_controller_1 = __importDefault(require("../../controllers/relationships.controller"));
+const updates_controller_1 = __importDefault(require("../../controllers/updates.controller"));
 const BASE_URL = "https://dados.cvm.gov.br";
-const STR_FILEPATH = "resources/";
 function findMostRecentPageHref() {
     return __awaiter(this, void 0, void 0, function* () {
         const STR_PARENT_SELECTOR = "ul.resource-list";
@@ -43,22 +42,19 @@ function findMostRecentZipHref() {
         return htmlResource.attribs.href;
     });
 }
-function downloadZIP() {
+function getZIP() {
     return __awaiter(this, void 0, void 0, function* () {
         const hrefZIP = yield findMostRecentZipHref();
         const filename = hrefZIP.split("/").splice(-1)[0];
-        if (fs_1.default.existsSync(STR_FILEPATH + filename)) {
-            return "";
+        const strLastSaved = yield updates_controller_1.default.getMostRecentUpdate();
+        if (filename === strLastSaved) {
+            return null;
         }
         const res = yield axios_1.default.get(hrefZIP, { responseType: "arraybuffer" });
-        if (!fs_1.default.existsSync(STR_FILEPATH)) {
-            fs_1.default.mkdirSync(STR_FILEPATH);
-        }
-        fs_1.default.writeFileSync(STR_FILEPATH + filename, res.data);
-        return STR_FILEPATH + filename;
+        return { data: res.data, filename };
     });
 }
-function insertIntoDB(strPath) {
+function insertIntoDB(buffer) {
     return __awaiter(this, void 0, void 0, function* () {
         const N_CNPJ = 1;
         const N_DENOM = 2;
@@ -66,7 +62,7 @@ function insertIntoDB(strPath) {
         const N_ASSET = 16;
         const N_COMPANY = 17;
         const STR_STOCKS = "Ações";
-        const data = fs_1.default.readFileSync(strPath, { encoding: "latin1" }).split(/\r?\n/);
+        const data = buffer.toString("latin1").split(/\r?\n/);
         const pairs = [];
         data.forEach((entry) => {
             const entryData = entry.split(";");
@@ -91,16 +87,15 @@ function insertIntoDB(strPath) {
 function downloadResource() {
     return __awaiter(this, void 0, void 0, function* () {
         const STR_WANTED_FILE = "cda_fi_BLC_4";
-        const STR_LOCAL_FILE = "compositions.csv";
         try {
-            const zipPath = yield downloadZIP();
-            if (zipPath) {
-                const files = yield (0, decompress_1.default)(zipPath);
+            const zipFile = yield getZIP();
+            if (zipFile) {
+                const files = yield (0, decompress_1.default)(zipFile.data);
                 const fileWanted = files.find((file) => {
                     return file.path.startsWith(STR_WANTED_FILE);
                 }) || files[0];
-                fs_1.default.writeFileSync(STR_FILEPATH + STR_LOCAL_FILE, fileWanted.data);
-                yield insertIntoDB(STR_FILEPATH + STR_LOCAL_FILE);
+                yield insertIntoDB(fileWanted.data);
+                yield updates_controller_1.default.insertNewUpdate(zipFile.filename);
                 (0, apriori_1.createRecomendations)();
             }
         }
