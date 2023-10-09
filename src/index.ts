@@ -22,6 +22,6 @@ connectToDatabase()
 
     downloader();
   })
-  .catch(() => {
-    console.log("Error connecting to DB");
+  .catch((e) => {
+    console.log("Error connecting to DB", e);
   });

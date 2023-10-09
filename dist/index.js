@@ -23,6 +23,6 @@ app.get("/", (req, res) => {
     app.listen(3333);
     (0, downloader_1.default)();
 })
-    .catch(() => {
-    console.log("Error connecting to DB");
+    .catch((e) => {
+    console.log("Error connecting to DB", e);
 });
